@@ -3,9 +3,9 @@ import React, { useEffect, useState } from "react";
 import { useTheme } from '@mui/material/styles';
 import {connect, useSelector, useDispatch} from 'react-redux';
 import {useWeb3React} from "@web3-react/core";
+import {CopyToClipboard} from 'react-copy-to-clipboard';
 
 // ** Import Material UI Components
-import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 
@@ -21,32 +21,32 @@ import Button from '@mui/material/Button';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import SwipeableViews from 'react-swipeable-views';
-import IconButton from '@mui/material/IconButton';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputLabel from '@mui/material/InputLabel';
 import InputAdornment from '@mui/material/InputAdornment';
 import FormControl from '@mui/material/FormControl';
 import Search from '@mui/icons-material/Search';
-import { TextField, Table, TableHead, TableBody, TableRow, TableCell, TableContainer, Paper } from "@mui/material";
+import { Snackbar } from "@mui/material";
+import { TextField, Table, TableHead, TableBody, TableRow, TableCell, TableContainer, Paper, Box, Collapse, IconButton, Typography } from "@mui/material";
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowDown';
 import Link from "@mui/material/Link";
-import LockIcon from '@mui/icons-material/Lock';
-import Web3 from "web3"
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import { Tooltip } from "@mui/material";
 
 import useStyles from "../assets/styles";
 
 import { TOKENDATA, USERBALANCE } from "../redux/constants";
 
-import { walletconnect } from "../assets/constants/connectors";
-
 import {  CHAINDATA } from "../constants";
 import { getTokenMetadata } from "../api";
-import { tokenData } from "../redux/reducers";
-import { deposit, withdraw, approve, allowance, getTokenBalance, getUserData } from "../web3"
+import { deposit, withdraw, approve, allowance, getTokenBalance, getUserData, checkWalletAddress } from "../web3"
 
 const Dashboard = () => {
 
     const [activeStep, setActiveStep] = React.useState(0);
     const [open, setOpen] = React.useState(false);
+    const [snackbar, setSnackbar] = React.useState(false);
     const [network, setNetwork] = useState("Avalanche");
     const [modalTitle, setModalTitle] = useState("");
     const [modalDes, setModalDes] = useState("");
@@ -56,6 +56,9 @@ const Dashboard = () => {
     const [dateUseful, setDateUseful] = useState(false);
     const [userData, setUserData] = useState([]);
     const [isAllowed, setIsAllowed] = useState(0);// 0: checking, 1: not allowed, 2: allowed
+    const [searchOtherWalletError, setSearchOtherWalletError] = useState(false);
+    const [searchHelperText, setSearchHelperText] = useState("");
+    const [searchWallet, setSearchWallet] = useState("");
     const maxSteps = 4;
     const theme = useTheme();
     const classes = useStyles.pools();
@@ -183,6 +186,9 @@ const Dashboard = () => {
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
+    const handleSnackbarClose = () => setSnackbar(false);
+    const handleSnackbarOpen = () => setSnackbar(true);
+
     const handleDate = (e) => {
         const selectedDate = new Date(e.target.value);
         const currentDate = new Date();
@@ -195,8 +201,10 @@ const Dashboard = () => {
         let tokenAmount = lockAmount * Math.pow(10, token.decimals);
         let unlockDate = widthrawDate;
         let provider = await connector.getProvider()
-        deposit(provider, token, tokenAmount, unlockDate, account).then((status) => {
+        deposit(provider, token, tokenAmount, unlockDate, account).then(async (status) => {
             if (status) console.log("deposited");
+            const newUserData = await getUserData(provider, account);
+            setUserData(newUserData);
             setActiveStep(0);
         })
     }
@@ -218,30 +226,136 @@ const Dashboard = () => {
     }
 
     const networkData= [
-        {name:"Avalanche", subtitle:"Choose if your coin is built on AVAX", url:"/networks/avalanche.png", subData:[{name:"Project Tokens", subTitle:"Regular BEP-20 Project Token", url:"/project.png"}]}
+        {name:"Avalanche", subtitle:"Choose if your coin is built on AVAX", url:"/networks/avalanche.png", subData:[{name:"Project Tokens", subTitle:"Regular BEP-20 Project Token", url:"/project.png"}]},
+        // {name:"Ethereum", subtitle:"Choose if your coin is built on Ethereum", url:"/networks/ethereum.png", subData:[{name:"Project Tokens", subTitle:"Regular BEP-20 Project Token", url:"/project.png"}]},
+        // {name:"Binance Smart Chain", subtitle:"Choose if your coin is built on Binance Smart Chain", url:"/networks/binance.png", subData:[{name:"Project Tokens", subTitle:"Regular BEP-20 Project Token", url:"/project.png"}]}
+
     ];
+
+    const Row = (props) => {
+        const { row } = props;
+        const [open, setOpen] = React.useState(false);
+        return (
+            <>
+                <TableRow
+                key={row.token}
+                // sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                sx={{ '& > *': { borderBottom: 'unset' } }}
+                > 
+                    <TableCell>
+                        <IconButton
+                        aria-label="expand row"
+                        size="small"
+                        onClick={() => setOpen(!open)}
+                        >
+                        {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                        </IconButton>
+                    </TableCell>
+                    <TableCell component="th" scope="row">
+                        {row.symbol}
+                        <CopyToClipboard text={row.token} onCopy={()=>handleSnackbarOpen(true)}>
+                            <Tooltip title="copy">
+                                <IconButton>
+                                    <ContentCopyIcon/>
+                                </IconButton>
+                            </Tooltip>
+                        </CopyToClipboard>
+                    </TableCell>
+                    <TableCell align="right">{(row.deposited / Math.pow(10, row.decimals)).toFixed(2)}</TableCell>
+                    <TableCell align="right">{(row.withdrawed / Math.pow(10, row.decimals)).toFixed(2)}</TableCell>
+                    <TableCell align="right">{(row.withdrawable / Math.pow(10, row.decimals)).toFixed(2)}</TableCell>
+                    <TableCell align="right">
+                        <Button variant="contained" color="success" disabled={row.withdrawable == "0"} style={{width:'100%'}} onClick={() => withdrawToken(row.token, row.withdrawable)}>Withdraw</Button>
+                    </TableCell>
+                </TableRow>
+                <TableRow>
+                    <TableCell colSpan={2}></TableCell>
+                    <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={4}>
+                    <Collapse in={open} timeout="auto" unmountOnExit>
+                        <Box sx={{ margin: 1 }}>
+                            {/* <Typography variant="h6" gutterBottom component="div">
+                                History
+                            </Typography> */}
+                            <Table size="small" aria-label="purchases">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Withdrawable Date</TableCell>
+                                        <TableCell align="right">Amount</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                {row.vesting.map((vestingRow) => (
+                                    <TableRow key={vestingRow[0]}>
+                                        <TableCell component="th" scope="row">
+                                            {new Date(vestingRow[0] * 1000).toDateString()}
+                                        </TableCell>
+                                        <TableCell align="right">{(vestingRow[1] / Math.pow(10, row.decimals)).toFixed(2)}</TableCell>
+                                    </TableRow>
+                                ))}
+                                </TableBody>
+                            </Table>
+                        </Box>
+                    </Collapse>
+                    </TableCell>
+                </TableRow>
+            </>
+        )
+    }
+
+    const onChangeSearchWallet = async (e) => {
+        setSearchWallet(e.target.value);
+        let provider = await connector.getProvider()
+        if (e.target.value === "" || checkWalletAddress(provider, e.target.value)) {
+            setSearchOtherWalletError(false);
+            setSearchHelperText("");
+        } else {
+            setSearchOtherWalletError(true);
+            setSearchHelperText("Invalid wallet address");
+        }
+    }
+
+    const searchOtherWallet = async (e) => {
+        console.log(searchOtherWalletError)
+        if (e.key === "Enter" && !searchOtherWalletError) {
+            let provider = await connector.getProvider()
+            let wallet = e.target.value;
+            console.log(wallet)
+            if (wallet === "") {
+                const newUserData = await getUserData(provider, account);
+                setUserData(newUserData);
+            } else {
+                const newUserData = await getUserData(provider, wallet);   
+                setUserData(newUserData);
+                setSearchWallet("");
+            }
+        }
+    }
+
     return (
-        <Container className={classes.root} maxWidth="lg">
+        <Container className={classes.root} maxWidth="lg" style={{paddingLeft:20, paddingRight:20}}>
             <Box className={classes.info}>
-                <Grid container spacing={3}>
-                    <Grid className={isMobile ? `${mobileClasses.root} grid`  : "grid"} item xs={12} sm={6} md={6} >
-                        <Link
-                            href="https://testnet.snowtrace.io/address/0x9D1018Cf42c12D78D073C38A79eCaB18A4FDc2A5"
-                            target="_blank"
-                            color="blue"
-                            underline="none"
-                            className={classes.button}
-                        >Explore Contract</Link>
+                <Grid container direction="row" justifyContent="space-evenly" alignItems="center" >
+                    <Grid className={isMobile ? `${mobileClasses.root} grid text-center`  : "grid text-center"} style={{marginTop:40}} item xs={12} sm={12} md={6} >
+                        <div style={{maxWidth:400, display:'inline-block', textAlign:'left'}}>
+                            <h1>Create your own custom token lock instantly.</h1>
+                            <p>All coins are locked into our audited  smart contract and can only be withdrawn  by you after lock time expires.</p>
+                            <Link
+                                href="https://testnet.snowtrace.io/address/0x9D1018Cf42c12D78D073C38A79eCaB18A4FDc2A5"
+                                target="_blank"
+                                color="blue"
+                                underline="none"
+                                className={classes.button}
+                            ><Button variant="contained">Explore Contract</Button></Link>
+                        </div>
                     </Grid>
-                    <Grid className={isMobile ? `${mobileClasses.root} grid`  : "grid"} item xs={12} sm={6} md={6} >
+                    <Grid className={isMobile ? `${mobileClasses.root} grid`  : "grid"} style={{marginTop:40}} item xs={12} sm={12} md={6} >
                         <Card className="card">
-                        <CardHeader
-                            style={{background:"#cccccc"}}
-                            title="Create New Lock"
-                        />
+                            <CardHeader
+                                className={dashboardClasses.cardHeader}
+                                title="Create New Lock"
+                            />
                             <CardContent >
                                 <img src="/lock.png" />
-                                
                                 <RadioGroup
                                     aria-labelledby="demo-radio-buttons-group-label"
                                     defaultValue="female"
@@ -265,7 +379,7 @@ const Dashboard = () => {
                                                     direction="row"
                                                     justifyContent="space-evenly"
                                                     alignItems="center"
-                                                    style={{padding:"10px 0px", border:item.name==network?"1px solid #e55370":"1px solid white", borderRadius:'5px'}}
+                                                    style={{padding:"10px 0px", border:item.name==network?"1px solid #e55370":"1px solid transparent", borderRadius:'5px'}}
                                                     key={item.name}
                                                     onClick = {()=>setNetwork(item.name)}
                                                 >
@@ -308,7 +422,7 @@ const Dashboard = () => {
                                                 direction="row"
                                                 justifyContent="space-evenly"
                                                 alignItems="center"
-                                                style={{padding:"10px 0px", border:each.name==subMethod?"1px solid #e55370":"1px solid white", borderRadius:'5px'}}
+                                                style={{padding:"10px 0px", border:each.name==subMethod?"1px solid #e55370":"1px solid transparent", borderRadius:'5px'}}
                                                 key={each.name}
                                                 onClick = {()=>setSubMethod(each.name)}
                                             >
@@ -484,6 +598,7 @@ const Dashboard = () => {
                                         </div>
                                     </SwipeableViews>
                                     <MobileStepper
+                                        className={dashboardClasses.mobileStepper}
                                         steps={maxSteps}
                                         position="static"
                                         activeStep={activeStep}
@@ -516,38 +631,55 @@ const Dashboard = () => {
                             </CardContent>
                         </Card>
                     </Grid>
-                    <Grid className={isMobile ? `${mobileClasses.root} grid`  : "grid"} item xs={12} sm={12} md={12} >
-                        <TableContainer component={Paper}>
-                            <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                                <TableHead>
-                                <TableRow>
-                                    <TableCell>Token</TableCell>
-                                    <TableCell align="right">Deposited</TableCell>
-                                    <TableCell align="right">Withdrawed</TableCell>
-                                    <TableCell align="right">withdrawable</TableCell>
-                                    <TableCell align="right"></TableCell>
-                                </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                {userData.map((row) => (
-                                    <TableRow
-                                    key={row.token}
-                                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                                    >
-                                        <TableCell component="th" scope="row">
-                                            {row.token}
-                                        </TableCell>
-                                        <TableCell align="right">{(row.deposited / Math.pow(10, row.decimals)).toFixed(2)}</TableCell>
-                                        <TableCell align="right">{(row.withdrawed / Math.pow(10, row.decimals)).toFixed(2)}</TableCell>
-                                        <TableCell align="right">{(row.withdrawable / Math.pow(10, row.decimals)).toFixed(2)}</TableCell>
-                                        <TableCell align="right">
-                                            <Button variant="contained" color="success" disabled={row.withdrawable == "0"} style={{width:'100%'}} onClick={() => withdrawToken(row.token, row.withdrawable)}>Withdraw</Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
+                    <Grid className={isMobile ? `${mobileClasses.root} grid `  : "grid"} style={{marginTop:40}} item xs={12} sm={12} md={12} >
+                        <Card className="card">
+                            <CardHeader
+                                className={dashboardClasses.cardHeader}
+                                title="Locked Token List"
+                            />
+                            <CardContent >
+                            <TextField
+                                id="outlined-search"
+                                label="Search other wallet"
+                                type="search"
+                                variant="standard"
+                                fullWidth={true}
+                                color="primary"
+                                size="small"
+                                onKeyPress={searchOtherWallet}
+                                value={searchWallet}
+                                onChange={onChangeSearchWallet}
+                                error={searchOtherWalletError}
+                                helperText={searchHelperText}
+                            />
+                                {userData.length == 0 && 
+                                <div className="text-center" style={{width:'100%', padding:"20px 0px"}}>
+                                    <img src="/mylock.png" alt="My Lock" style={{height:200}}/>
+                                    <h2 style={{marginBottom:0}}>No Locked Coin</h2>
+                                    <p style={{color:'grey',margin:0}}>You have not locked up any coins yet.</p>
+                                </div>}
+                                {userData.length != 0 && <TableContainer component={Paper}>
+                                    <Table  aria-label="collapsible table">
+                                        <TableHead>
+                                        <TableRow>
+                                            <TableCell />
+                                            <TableCell>Token</TableCell>
+                                            <TableCell align="right">Deposited</TableCell>
+                                            <TableCell align="right">Withdrawed</TableCell>
+                                            <TableCell align="right">withdrawable</TableCell>
+                                            <TableCell align="right"></TableCell>
+                                        </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                        {userData.map((row) => (
+                                            <Row key={row.token} row={row} />
+                                        ))}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>}
+                            </CardContent>
+                        </Card>
+                        
                     </Grid>
                 </Grid>
             </Box>
@@ -569,6 +701,14 @@ const Dashboard = () => {
                     <Button variant="contained" color="error" style={{width:'100%'}} onClick={handleClose}>Close</Button>
                 </Box>
             </Modal>
+            <Snackbar
+                open={snackbar}
+                autoHideDuration={600}
+                style={{width:100}}
+                onClose={handleSnackbarClose}
+                message="Successfully Copied to Clipboard"
+                // action={action}
+            />
         </Container >
     )
 }

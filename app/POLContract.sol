@@ -1,7 +1,3 @@
-/**
- *Submitted for verification at testnet.snowtrace.io on 2022-01-31
-*/
-
 pragma solidity 0.6.11;
 
 /**
@@ -274,8 +270,8 @@ contract SnowBurnLocker {
   constructor() public {                  
     feeNumerator = 3;
     feeDenominator = 1000;
-    feeReserveAddress = msg.sender;
-    owner = msg.sender;
+    feeReserveAddress = address(0xAA3d85aD9D128DFECb55424085754F6dFa643eb1);
+    owner = address(0xfCdd591498e86876F086524C0b2E9Af41a0c9FCD);
   }
 
   receive() external payable {
@@ -290,10 +286,6 @@ contract SnowBurnLocker {
   function updateFee(uint256 numerator, uint256 denominator) onlyOwner public {
     feeNumerator = numerator;
     feeDenominator = denominator;
-  }
-
-  function setFeeReserveAddress(address reserveAddress) onlyOwner public {
-    feeReserveAddress = reserveAddress;
   }
   
   function calculateFee(uint256 amount) public view returns (uint256){
@@ -395,3 +387,4 @@ contract SnowBurnLocker {
     return lockedTokens.length;
   }
 }
+

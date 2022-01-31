@@ -10,9 +10,16 @@ const useStyles = makeStyles((theme) => ({
     networkImage:{
         height:'40px',
     },
+    cardHeader: {
+        backgroundColor:"#565656",
+    },
     networkTitle: {
         fontWeight:'bold',
         margin:0,
+    },
+    mobileStepper: {
+        marginTop:30,
+        backgroundColor:"transparent",
     },
     networkDes: {
         fontSize:12,
@@ -56,6 +63,10 @@ const useStyles = makeStyles((theme) => ({
         display:"inline", 
         position:'relative', 
         top:'-8px'
+    },
+    myLockContainer: {
+        borderRadius:'10px',
+        background: 'white'
     }
 }));
 export default useStyles;
