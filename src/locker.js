@@ -78,7 +78,7 @@ const addDetailsToRawData = async (rawData) => {
 const checkIsLiquidity = async (detailData) => {
     let i, abi, contractCallContext, response
     for (i = 0; i < detailData.length; i++) {
-        if (liquidityList.indexOf(detailData[i].name) !== -1) {
+        if (liquidityList.indexOf(detailData[i].symbol) !== -1) {
             detailData[i].isLiquidity = true;
             abi = token0_abi.concat(token1_abi);
             contractCallContext = {

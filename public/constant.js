@@ -1,7 +1,7 @@
 const lockerAddress = '0x8ba74905c9ab0aa185e04498e2f83f8cdec20561';
 const provider = 'https://api.avax.network/ext/bc/C/rpc';
 const liquidityList = [
-    'Joe LP Token'
+    'JLP'
 ]
 const wavax = '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7';
 // const swapTokenLockerFactory = '0x6a33a15d826e59792b60dec950e8af2fa7d58f9e';
