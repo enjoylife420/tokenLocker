@@ -12,7 +12,7 @@ const { startVesting } = require('./src/vesting');
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({
-    extended: true
+    extended: false
 }));
 
 app.use(express.static('build'));
