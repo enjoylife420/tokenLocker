@@ -25,7 +25,7 @@ const _fetchLogs = () => {
         const lastLog = log[0];
         let lastBlock = 0;
         if (lastLog) lastBlock = Number(lastLog.block_number);
-        console.log(lastBlock);
+        // console.log(lastBlock);
         let offset = 0;
         try {
             axios.get(`${serverUrl}/${tokenAddress}/logs?chain=${chain}&from_block=${lastBlock+1}&topic0=0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef&oder=asc`, apiConfig).then(async (response) => {
@@ -36,7 +36,7 @@ const _fetchLogs = () => {
                 while (page < pages) {
                     offset = page * 500;
                     const response = await axios.get(`${serverUrl}/${tokenAddress}/logs?chain=${chain}&from_block=${lastBlock+1}&topic0=0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef&offset=${offset}&oder=asc`, apiConfig);
-                    console.log(response.data.result.length);
+                    // console.log(response.data.result.length);
                     logs = logs.concat(response.data.result);
                     page++;
                 }
