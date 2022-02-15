@@ -1,8 +1,10 @@
 const Datastore = require('nedb');
 const logs = new Datastore({ filename: './datastore/logs.db', autoload: true });
 
-const AddLogs = (newLogs) => {
-    logs.insert(newLogs);
+const AddLogs = (newLogs, cb) => {
+    logs.insert(newLogs).exec((err) => {
+        cb();
+    });
 }
 const getLastLog = (cb) => {
     logs.find().sort({ block_number: -1 }).limit(1).exec((err, data) => {

@@ -40,8 +40,9 @@ const _fetchLogs = () => {
                     logs = logs.concat(response.data.result);
                     page++;
                 }
-                AddLogs(logs);
-                isFetchingLogs = false;
+                AddLogs(logs, () => {
+                    isFetchingLogs = false;
+                });
             })
         } catch (e) {
             isFetchingLogs = false;
