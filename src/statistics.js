@@ -14,13 +14,14 @@ const { getLastLog, getLogsByFilter, AddLogs } = require('../database/statistics
 let isFetchingLogs = false;
 
 const fetchLogs = async function(interval) {
-    isFetchingLogs = true;
     setInterval(() => {
         _fetchLogs();
     }, interval);
 }
 
 const _fetchLogs = () => {
+    if (isFetchingLogs) return;
+    isFetchingLogs = true;
     getLastLog((log) => {
         const lastLog = log[0];
         let lastBlock = 0;
