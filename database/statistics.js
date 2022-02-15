@@ -2,7 +2,7 @@ const Datastore = require('nedb');
 const logs = new Datastore({ filename: './datastore/logs.db', autoload: true });
 
 const AddLogs = (newLogs, cb) => {
-    logs.insert(newLogs).exec((err) => {
+    logs.insert(newLogs, (err) => {
         cb();
     });
 }
