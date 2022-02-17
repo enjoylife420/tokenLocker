@@ -1,4 +1,5 @@
 const tokenAddress = '0xdb9438f5e3afa5ced760be9692604c3c5ab816d1';
+const tokenCreator = '0x129ebb3b65c71514a4dfcdaf3adc18c95d5a8743';
 const lockerAddress = '0x8ba74905c9ab0aa185e04498e2f83f8cdec20561';
 const provider = 'https://api.avax.network/ext/bc/C/rpc';
 const chain = '0xa86a';
@@ -16,5 +17,6 @@ module.exports = {
     chain,
     liquidityList,
     wavax,
-    swapTokenLockerFactory
+    swapTokenLockerFactory,
+    tokenCreator
 }

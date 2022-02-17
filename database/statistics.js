@@ -1,11 +1,12 @@
 const Datastore = require('nedb');
 const logs = new Datastore({ filename: './datastore/logs.db', autoload: true });
 
-const AddLogs = (newLogs, cb) => {
+const addLogs = (newLogs, cb) => {
     logs.insert(newLogs, (err) => {
         cb();
     });
 }
+
 const getLastLog = (cb) => {
     logs.find().sort({ block_number: -1 }).limit(1).exec((err, data) => {
         if(err) cb(undefined);
@@ -20,8 +21,15 @@ const getLogsByFilter = (wallet, cb) => {
     })
 }
 
+const getAllLogs = (cb) => {
+    logs.find({}, (err, data) => {
+        cb(data);
+    })
+}
+
 module.exports = {
-    AddLogs,
+    addLogs,
     getLastLog,
-    getLogsByFilter
+    getLogsByFilter,
+    getAllLogs
 }
