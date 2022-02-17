@@ -7,8 +7,9 @@ const app = express();
 const locker = require('./routes/locker');
 const vesting = require('./routes/vesting');
 const logs = require('./routes/logs');
+const holders = require('./routes/holders');
 const { startLocker } = require('./src/locker');
-const { fetchLogs, filterLogs } = require('./src/statistics');
+const { fetchLogs, initiateHolders } = require('./src/statistics');
 
 app.use(cors());
 app.use(express.json());
@@ -22,6 +23,7 @@ app.use(express.static('build'));
 app.use('/api/locker', locker);
 app.use('/api/vesting', vesting);
 app.use('/api/logs', logs);
+app.use('/api/holders', holders);
 
 let PORT = process.env.PORT || 5000;
 
@@ -32,4 +34,5 @@ app.listen(PORT, () => {
 app.get('*', (req, res) => res.sendFile(path.resolve('build', 'index.html')));
 
 startLocker(5000);
-fetchLogs(5000);
+fetchLogs(30000);
+initiateHolders();
