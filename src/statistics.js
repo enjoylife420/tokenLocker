@@ -131,7 +131,10 @@ const getHolderDetailByWallet = (wallet, cb) => {
 }
 
 const getHoldersDetail = (cb) => {
-    cb(holdersDetail.sort((a,b) => b.amount - a.amount));
+    const sortedHoldersDetail = holdersDetail.sort((a,b) => {
+        return b.amount - a.amount;
+    });
+    cb(sortedHoldersDetail);
 }
 
 module.exports = {
