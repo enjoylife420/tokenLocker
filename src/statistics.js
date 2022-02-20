@@ -143,7 +143,7 @@ const getHoldersDetailInAirdropFormat = (cb) => {
     });
     let AirdropFormat = '';
     for (let i = 0; i < sortedHoldersDetail.length; i++) {
-        if (i === 0) AirdropFormat += `${sortedHoldersDetail[i].address};${Math.round(sortedHoldersDetail[i].amount / Math.pow(10, 18))}`;
+        if (i === 0) AirdropFormat = `${sortedHoldersDetail[i].address};${Math.round(sortedHoldersDetail[i].amount / Math.pow(10, 18))}`;
         else AirdropFormat += `\r\n${sortedHoldersDetail[i].address};${Math.round(sortedHoldersDetail[i].amount / Math.pow(10, 18))}`;
     }
     cb(AirdropFormat);
