@@ -137,10 +137,23 @@ const getHoldersDetail = (cb) => {
     cb(sortedHoldersDetail);
 }
 
+const getHoldersDetailInAirdropFormat = (cb) => {
+    const sortedHoldersDetail = holdersDetail.sort((a,b) => {
+        return b.amount - a.amount;
+    });
+    let AirdropFormat = '';
+    for (let i = 0; i < sortedHoldersDetail.length; i++) {
+        if (i === 0) AirdropFormat += `${sortedHoldersDetail[i].address};${Math.round(sortedHoldersDetail[i].amount / Math.pow(10, 18))}`;
+        else AirdropFormat += `\r\n${sortedHoldersDetail[i].address};${Math.round(sortedHoldersDetail[i].amount / Math.pow(10, 18))}`;
+    }
+    cb(AirdropFormat);
+}
+ 
 module.exports = {
     fetchLogs,
     filterLogs,
     initiateHolders,
     getHolderDetailByWallet,
-    getHoldersDetail
+    getHoldersDetail,
+    getHoldersDetailInAirdropFormat
 }
