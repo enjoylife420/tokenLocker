@@ -130,9 +130,14 @@ const getHolderDetailByWallet = (wallet, cb) => {
     else cb({ total: sortedHoldersDetail.length, ranking: sortedHoldersDetail.length + 1});
 }
 
+const getHoldersDetail = (cb) => {
+    cb(holdersDetail.sort((a,b) => b.amount - a.amount));
+}
+
 module.exports = {
     fetchLogs,
     filterLogs,
     initiateHolders,
-    getHolderDetailByWallet
+    getHolderDetailByWallet,
+    getHoldersDetail
 }
