@@ -9,7 +9,7 @@ const liquidityList = [
 ]
 const wavax = '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7';
 // const swapTokenLockerFactory = '0x6a33a15d826e59792b60dec950e8af2fa7d58f9e';
-const swapTokenLockerFactory = '0x74818F8D9C0666ab332Af6B8DCBc448e1F10A133';
+const swapTokenLockerFactory = '0xA21121b3DfD558a3A91d508049D1454073c134D4';
 
 module.exports = {
     tokenAddress,
