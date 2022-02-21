@@ -1,4 +1,5 @@
-const tokenAddress = '0xdb9438f5e3afa5ced760be9692604c3c5ab816d1';
+// const tokenAddress = '0xdb9438f5e3afa5ced760be9692604c3c5ab816d1';
+const tokenAddress = '0x2f4FC16308Be09e7611a047B9576881Eb5298dD6';
 const tokenCreator = '0x129ebb3b65c71514a4dfcdaf3adc18c95d5a8743';
 const lockerAddress = '0x8ba74905c9ab0aa185e04498e2f83f8cdec20561';
 const provider = 'https://api.avax.network/ext/bc/C/rpc';
