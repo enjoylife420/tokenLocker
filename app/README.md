@@ -1,2 +1,0 @@
-# AutoMaticProd
-Auto Matic Production
