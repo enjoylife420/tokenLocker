@@ -5,7 +5,7 @@ const lockerAddress = {
     "Ethereum": "0x8ba74905c9ab0aa185e04498e2f83f8cdec20561",
     "Binance Smart Chain": "0x2ac8a31ac8325974a57efc34672f3e348b2e715f",
     "Avalanche": "0x8ba74905c9ab0aa185e04498e2f83f8cdec20561",
-    "Avalanche_testnet": "0x54eFc25b4B3d0f08494B685F41ccd834bb95AA23"
+    "Avalanche_testnet": "0x5FCCa8AEf0a280b77E68a695B153a674d9b03408"
 };
 const provider = {
     "Ethereum": "https://mainnet.infura.io/v3/3587df9c45a740f9812d093074c6a505",
