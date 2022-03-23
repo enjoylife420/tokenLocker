@@ -4,7 +4,7 @@ const { Multicall } = require('ethereum-multicall');
 const { getAllDepositIds_abi, lockedToken_abi, LogLocking_abi, LogWithdrawal_abi } = require('../public/abi/locker_abi');
 const { token0_abi, token1_abi } = require('../public/abi/liquidityPool_abi');
 const { symbolAbi, decimalsAbi, totalSupplyAbi, nameAbi } = require('../public/abi/erc20_abi');
-const { lockerAddress, liquidityList, provider, wavax, weth, wbnb, networks } = require('../public/constant');
+const { lockerAddress, liquidityList, provider, wavax, weth, wbnb, networks, wavax_test } = require('../public/constant');
 const { countLockedToken, updateLockedToken, userLockedTokens, lastBlockDepositEvents, updateDepositEvents, userDepositEvents, lastBlockWithdrawEvents, updateWithdrawEvents, userWithdrawEvents } = require('../database/locker');
 
 const web3_eth = new Web3(provider[networks[0]]);
@@ -13,6 +13,8 @@ const web3_bsc = new Web3(provider[networks[1]]);
 const multicall_bsc = new Multicall({ web3Instance: web3_bsc, tryAggregate: true });
 const web3_avax = new Web3(provider[networks[2]]);
 const multicall_avax = new Multicall({ web3Instance: web3_avax, tryAggregate: true });
+const web3_avax_test = new Web3(provider[networks[3]]);
+const multicall_avax_test = new Multicall({ web3Instance: web3_avax_test, tryAggregate: true });
 
 const getRawData = async (network, lastId) => {
     let _web3, _multicall;
@@ -24,6 +26,10 @@ const getRawData = async (network, lastId) => {
         case networks[1]:
             _web3 = web3_bsc;
             _multicall = multicall_bsc;
+            break;
+        case networks[3]:
+            _web3 = web3_avax_test;
+            _multicall = multicall_avax_test;
             break;
         default:
             _web3 = web3_avax;
@@ -74,6 +80,10 @@ const addDetailsToRawData = async (network, rawData) => {
             _web3 = web3_bsc;
             _multicall = multicall_bsc;
             break;
+        case networks[3]:
+            _web3 = web3_avax_test;
+            _multicall = multicall_avax_test;
+            break;
         default:
             _web3 = web3_avax;
             _multicall = multicall_avax;
@@ -117,6 +127,10 @@ const checkIsLiquidity = async (network, detailData) => {
         case networks[1]:
             _web3 = web3_bsc;
             _multicall = multicall_bsc;
+            break;
+        case networks[3]:
+            _web3 = web3_avax_test;
+            _multicall = multicall_avax_test;
             break;
         default:
             _web3 = web3_avax;
@@ -216,6 +230,10 @@ const getDepositEvents = async (network, lastBlock) => {
             _web3 = web3_bsc;
             _multicall = multicall_bsc;
             break;
+        case networks[3]:
+            _web3 = web3_avax_test;
+            _multicall = multicall_avax_test;
+            break;
         default:
             _web3 = web3_avax;
             _multicall = multicall_avax;
@@ -246,6 +264,10 @@ const getWithdrawEvents = async (network, lastBlock) => {
         case networks[1]:
             _web3 = web3_bsc;
             _multicall = multicall_bsc;
+            break;
+        case networks[3]:
+            _web3 = web3_avax_test;
+            _multicall = multicall_avax_test;
             break;
         default:
             _web3 = web3_avax;
@@ -306,6 +328,9 @@ const getGroupByBaseToken = (network, lockedTokens) => {
             break;
         case networks[1]:
             _coin = wbnb;
+            break;
+        case networks[3]:
+            _coin = wavax_test;
             break;
         default:
             _coin = wavax;

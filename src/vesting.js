@@ -14,6 +14,7 @@ const { getDeployed_abi } = require('../public/abi/swapTokenLockerFactory_abi');
 const web3_eth = new Web3(provider[networks[0]]);
 const web3_bsc = new Web3(provider[networks[1]]);
 const web3_avax = new Web3(provider[networks[2]]);
+const web3_avax_test = new Web3(provider[networks[3]]);
 
 const getLastDeployedContract = async (network, wallet, cb) => {
     switch (network) {
@@ -22,6 +23,9 @@ const getLastDeployedContract = async (network, wallet, cb) => {
             break;
         case networks[1]:
             _web3 = web3_bsc;
+            break;
+        case networks[3]:
+            _web3 = web3_avax_test;
             break;
         default:
             _web3 = web3_avax;

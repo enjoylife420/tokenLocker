@@ -3,6 +3,9 @@ const Datastore = require('nedb');
 const locker = new Datastore({ filename: './datastore/locker.db', autoload: true });
 const depositEvents = new Datastore({filename: './datastore/depositEvents.db', autoload: true});
 const withdrawEvents = new Datastore({filename: './datastore/withdrawEvents.db', autoload: true});
+const locker_test = new Datastore({ filename: './datastore/locker_test.db', autoload: true });
+const depositEvents_test = new Datastore({filename: './datastore/depositEvents_test.db', autoload: true});
+const withdrawEvents_test = new Datastore({filename: './datastore/withdrawEvents_test.db', autoload: true});
 const eth_locker = new Datastore({ filename: './datastore/eth_locker.db', autoload: true });
 const eth_depositEvents = new Datastore({filename: './datastore/eth_depositEvents.db', autoload: true});
 const eth_withdrawEvents = new Datastore({filename: './datastore/eth_withdrawEvents.db', autoload: true});
@@ -19,6 +22,11 @@ const userLockedTokens = (network, wallet, cb) => {
         })
     } else if (network === "Binance Smart Chain") {
         bsc_locker.find({ owner: wallet.toLowerCase() }).sort({ id: 1 }).exec((err, data) => {
+            if (err) cb([]);
+            else cb(data);
+        })
+    } else if (network === "Avalanche_testnet") {
+        locker_test.find({ owner: wallet.toLowerCase() }).sort({ id: 1 }).exec((err, data) => {
             if (err) cb([]);
             else cb(data);
         })
@@ -43,6 +51,12 @@ const countLockedToken = (network, cb) => {
             else if (data.length) cb(data[0].id);
             else cb(-1);
         })
+    } else if (network === "Avalanche_testnet") {
+        locker_test.find({}).sort({ id: -1 }).limit(1).exec((err, data) => {
+            if (err) cb(-1);
+            else if (data.length) cb(data[0].id);
+            else cb(-1);
+        })
     } else {
         locker.find({}).sort({ id: -1 }).limit(1).exec((err, data) => {
             if (err) cb(-1);
@@ -57,6 +71,8 @@ const updateLockedToken = (network, newLockedTokens) => {
         eth_locker.insert(newLockedTokens);
     } else if (network === "Binance Smart Chain") {
         bsc_locker.insert(newLockedTokens);
+    } else if (network === "Avalanche_testnet") {
+        locker_test.insert(newLockedTokens);
     } else {
         locker.insert(newLockedTokens);
     }
@@ -71,6 +87,11 @@ const userDepositEvents = (network, wallet, cb) => {
         })
     } else if (network === "Binance Smart Chain") {
         bsc_depositEvents.find({ SentToAddress: wallet.toLowerCase() }).sort({ index: 1 }).exec((err, data) => {
+            if (err) cb([]);
+            else cb(data);
+        })
+    } else if (network === "Avalanche_testnet") {
+       depositEvents_test.find({ SentToAddress: wallet.toLowerCase() }).sort({ index: 1 }).exec((err, data) => {
             if (err) cb([]);
             else cb(data);
         })
@@ -90,6 +111,11 @@ const lastBlockDepositEvents = (network, cb) => {
         })
     } else if (network === "Binance Smart Chain") {
         bsc_depositEvents.find({}).sort({ blockNumber: -1 }).limit(1).exec((err, event) => {
+            if (event.length) cb(event[0].blockNumber);
+            else cb(0);
+        })
+    } else if (network === "Avalanche_testnet") {
+        depositEvents_test.find({}).sort({ blockNumber: -1 }).limit(1).exec((err, event) => {
             if (event.length) cb(event[0].blockNumber);
             else cb(0);
         })
@@ -117,6 +143,19 @@ const updateDepositEvents = (network, newDepositEvents) => {
         }))
     } else if (network === "Binance Smart Chain") {
         bsc_depositEvents.insert(newDepositEvents.map(each => {
+            return {
+                address: each.address.toLowerCase(),
+                blockNumber: each.blockNumber,
+                transactionHash: each.transactionHash,
+                blockHash: each.blockHash,
+                index: each.returnValues.index,
+                SentToAddress: each.returnValues.SentToAddress.toLowerCase(),
+                AmountLocked: each.returnValues.AmountLocked,
+                timestamp: each.timestamp
+            }
+        }))
+    } else if (network === "Avalanche_testnet") {
+        depositEvents_test.insert(newDepositEvents.map(each => {
             return {
                 address: each.address.toLowerCase(),
                 blockNumber: each.blockNumber,
@@ -156,6 +195,11 @@ const userWithdrawEvents = (network, wallet, cb) => {
             if (err) cb([]);
             else cb(data);
         })
+    } else if (network === "Avalanche_testnet") {
+        withdrawEvents_test.find({ SentToAddress: wallet.toLowerCase() }).sort({ index: 1 }).exec((err, data) => {
+            if (err) cb([]);
+            else cb(data);
+        })
     } else {
         withdrawEvents.find({ SentToAddress: wallet.toLowerCase() }).sort({ index: 1 }).exec((err, data) => {
             if (err) cb([]);
@@ -172,6 +216,11 @@ const lastBlockWithdrawEvents = (network, cb) => {
         })
     } else if (network === "Binance Smart Chain") {
         bsc_withdrawEvents.find({}).sort({ blockNumber: -1 }).limit(1).exec((err, event) => {
+            if (event.length) cb(event[0].blockNumber);
+            else cb(0);
+        })
+    } else if (network === "Avalanche_testnet") {
+        withdrawEvents_test.find({}).sort({ blockNumber: -1 }).limit(1).exec((err, event) => {
             if (event.length) cb(event[0].blockNumber);
             else cb(0);
         })
@@ -215,6 +264,22 @@ const updateWithdrawEvents = (network, newWithdrawEvents) => {
         }))
         newWithdrawEvents.map(each => {
             bsc_locker.update({ id: each.index }, { isWithdrawn: true }, {});
+        })
+    } else if (network === "Avalanche_testnet") {
+        withdrawEvents_test.insert(newWithdrawEvents.map(each => {
+            return {
+                address: each.address.toLowerCase(),
+                blockNumber: each.blockNumber,
+                transactionHash: each.transactionHash,
+                blockHash: each.blockHash,
+                index: each.returnValues.index,
+                SentToAddress: each.returnValues.SentToAddress.toLowerCase(),
+                AmountTransferred: each.returnValues.AmountLocked,
+                timestamp: each.timestamp
+            }
+        }))
+        newWithdrawEvents.map(each => {
+            locker_test.update({ id: each.index }, { isWithdrawn: true }, {});
         })
     } else {
         withdrawEvents.insert(newWithdrawEvents.map(each => {

@@ -22,7 +22,8 @@ const chain = {
 const liquidityList = [
     'UNI-V2',
     'Cake-LP',
-    'JLP'
+    'JLP',
+    "HUL"
 ]
 
 const networks = [
@@ -32,6 +33,7 @@ const networks = [
     "Avalanche_testnet"
 ]
 const wavax = '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7';
+const wavax_test = '0xd00ae08403B9bbb9124bB305C09058E32C39A48c';
 const weth = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
 const wbnb = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
 // const swapTokenLockerFactory = '0x6a33a15d826e59792b60dec950e8af2fa7d58f9e';
@@ -51,6 +53,7 @@ module.exports = {
     wavax,
     weth,
     wbnb,
+    wavax_test,
     swapTokenLockerFactory,
     tokenCreator,
     networks
