@@ -4,14 +4,32 @@ const { Multicall } = require('ethereum-multicall');
 const { getAllDepositIds_abi, lockedToken_abi, LogLocking_abi, LogWithdrawal_abi } = require('../public/abi/locker_abi');
 const { token0_abi, token1_abi } = require('../public/abi/liquidityPool_abi');
 const { symbolAbi, decimalsAbi, totalSupplyAbi, nameAbi } = require('../public/abi/erc20_abi');
-const { lockerAddress, liquidityList, provider, wavax } = require('../public/constant');
+const { lockerAddress, liquidityList, provider, wavax, weth, wbnb, networks } = require('../public/constant');
 const { countLockedToken, updateLockedToken, userLockedTokens, lastBlockDepositEvents, updateDepositEvents, userDepositEvents, lastBlockWithdrawEvents, updateWithdrawEvents, userWithdrawEvents } = require('../database/locker');
 
-const web3 = new Web3(provider);
-const multicall = new Multicall({ web3Instance: web3, tryAggregate: true });
+const web3_eth = new Web3(provider[networks[0]]);
+const multicall_eth = new Multicall({ web3Instance: web3_eth, tryAggregate: true });
+const web3_bsc = new Web3(provider[networks[1]]);
+const multicall_bsc = new Multicall({ web3Instance: web3_bsc, tryAggregate: true });
+const web3_avax = new Web3(provider[networks[2]]);
+const multicall_avax = new Multicall({ web3Instance: web3_avax, tryAggregate: true });
 
-const getRawData = async (lastId) => {
-    let contract = new web3.eth.Contract(getAllDepositIds_abi, lockerAddress);
+const getRawData = async (network, lastId) => {
+    let _web3, _multicall;
+    switch (network) {
+        case networks[0]:
+            _web3 = web3_eth;
+            _multicall = multicall_eth;
+            break;
+        case networks[1]:
+            _web3 = web3_bsc;
+            _multicall = multicall_bsc;
+            break;
+        default:
+            _web3 = web3_avax;
+            _multicall = multicall_avax;
+    }
+    let contract = new _web3.eth.Contract(getAllDepositIds_abi, lockerAddress[network]);
     let depositIds, contractCallContext, response;
     try {
         depositIds = await contract.methods["getAllDepositIds"]().call();
@@ -22,14 +40,14 @@ const getRawData = async (lastId) => {
     if (!depositIds.length) return [];
     contractCallContext = {
         reference: "lockedToken",
-        contractAddress: lockerAddress,
+        contractAddress: lockerAddress[network],
         abi: lockedToken_abi,
         calls: depositIds.map(each => {
             return { reference: 'lockedTokensCall', methodName: 'lockedToken', methodParameters: [each] }
         })
     }
     try {
-        response = await multicall.call(contractCallContext);
+        response = await _multicall.call(contractCallContext);
     } catch (e) {
         return [];
     }
@@ -45,7 +63,21 @@ const getRawData = async (lastId) => {
     })
 }
 
-const addDetailsToRawData = async (rawData) => {
+const addDetailsToRawData = async (network, rawData) => {
+    let _web3, _multicall;
+    switch (network) {
+        case networks[0]:
+            _web3 = web3_eth;
+            _multicall = multicall_eth;
+            break;
+        case networks[1]:
+            _web3 = web3_bsc;
+            _multicall = multicall_bsc;
+            break;
+        default:
+            _web3 = web3_avax;
+            _multicall = multicall_avax;
+    }
     let abi, contractCallContext, response;
     abi = symbolAbi.concat(decimalsAbi).concat(totalSupplyAbi).concat(nameAbi);
     contractCallContext = rawData.map((each, index) => {
@@ -62,7 +94,7 @@ const addDetailsToRawData = async (rawData) => {
         }
     })
     try {
-        response = await multicall.call(contractCallContext);
+        response = await _multicall.call(contractCallContext);
     } catch (e) {
         return [];
     }
@@ -75,7 +107,21 @@ const addDetailsToRawData = async (rawData) => {
     return rawData;
 }
 
-const checkIsLiquidity = async (detailData) => {
+const checkIsLiquidity = async (network, detailData) => {
+    let _web3, _multicall;
+    switch (network) {
+        case networks[0]:
+            _web3 = web3_eth;
+            _multicall = multicall_eth;
+            break;
+        case networks[1]:
+            _web3 = web3_bsc;
+            _multicall = multicall_bsc;
+            break;
+        default:
+            _web3 = web3_avax;
+            _multicall = multicall_avax;
+    }
     let i, abi, contractCallContext, response
     for (i = 0; i < detailData.length; i++) {
         if (liquidityList.indexOf(detailData[i].symbol) !== -1) {
@@ -91,7 +137,7 @@ const checkIsLiquidity = async (detailData) => {
                 ]
             }
             try {
-                response = await multicall.call(contractCallContext);
+                response = await _multicall.call(contractCallContext);
             } catch (e) {
                 return [];
             }
@@ -123,7 +169,7 @@ const checkIsLiquidity = async (detailData) => {
                 }
             ]
             try {
-                response = await multicall.call(contractCallContext);
+                response = await _multicall.call(contractCallContext);
             } catch (e) {
                 return [];
             }
@@ -148,26 +194,40 @@ const checkIsLiquidity = async (detailData) => {
     return detailData;
 }
 
-const getLockedData = async (lastId) => {
+const getLockedData = async (network, lastId) => {
     try {
-        const rawData = await getRawData(lastId);
-        const detailData = await addDetailsToRawData(rawData);
-        const checkedData = await checkIsLiquidity(detailData);
+        const rawData = await getRawData(network, lastId);
+        const detailData = await addDetailsToRawData(network, rawData);
+        const checkedData = await checkIsLiquidity(network, detailData);
         return checkedData;
     } catch (e) {
         return [];
     }
 }
 
-const getDepositEvents = async (lastBlock) => {
+const getDepositEvents = async (network, lastBlock) => {
+    let _web3, _multicall;
+    switch (network) {
+        case networks[0]:
+            _web3 = web3_eth;
+            _multicall = multicall_eth;
+            break;
+        case networks[1]:
+            _web3 = web3_bsc;
+            _multicall = multicall_bsc;
+            break;
+        default:
+            _web3 = web3_avax;
+            _multicall = multicall_avax;
+    }
     let startBlock = lastBlock ? lastBlock + 1 : 0;
-    let lockerContract = new web3.eth.Contract(LogLocking_abi, lockerAddress);
+    let lockerContract = new _web3.eth.Contract(LogLocking_abi, lockerAddress[network]);
     try {
         let events = await lockerContract.getPastEvents("LogLocking", {
             fromBlock: startBlock
         })
         for (let i = 0; i < events.length; i++) {
-            const block = await web3.eth.getBlock(events[i].blockNumber);
+            const block = await _web3.eth.getBlock(events[i].blockNumber);
             events[i].timestamp = block.timestamp;
         }
         return events;
@@ -176,9 +236,23 @@ const getDepositEvents = async (lastBlock) => {
     }
 }
 
-const getWithdrawEvents = async (lastBlock) => {
+const getWithdrawEvents = async (network, lastBlock) => {
+    let _web3, _multicall;
+    switch (network) {
+        case networks[0]:
+            _web3 = web3_eth;
+            _multicall = multicall_eth;
+            break;
+        case networks[1]:
+            _web3 = web3_bsc;
+            _multicall = multicall_bsc;
+            break;
+        default:
+            _web3 = web3_avax;
+            _multicall = multicall_avax;
+    }
     let startBlock = lastBlock ? lastBlock + 1 : 0;
-    let lockerContract = new web3.eth.Contract(LogWithdrawal_abi, lockerAddress);
+    let lockerContract = new _web3.eth.Contract(LogWithdrawal_abi, lockerAddress[network]);
     try {
         let events = await lockerContract.getPastEvents("LogWithdrawal", {
             fromBlock: startBlock
@@ -201,38 +275,51 @@ const startLocker = async (interval) => {
         isLockedInterval = true;
         isDepositInterval = true;
         isWithdrawInterval = true;
-        countLockedToken((length) => {
-            getLockedData(length).then(results => {
-                updateLockedToken(results);
-                isLockedInterval = false;
-            });
-        })
-        lastBlockDepositEvents((lastBlock) => {
-            getDepositEvents(lastBlock).then(results => {
-                updateDepositEvents(results);
-                isDepositInterval = false;
-            });
-        })
-        lastBlockWithdrawEvents((lastBlock) => {
-            getWithdrawEvents(lastBlock).then(results => {
-                updateWithdrawEvents(results);
-                isWithdrawInterval = false;
-            });
+        networks.map(each => {
+            countLockedToken(each, (length) => {
+                getLockedData(each, length).then(results => {
+                    updateLockedToken(each, results);
+                    isLockedInterval = false;
+                });
+            })
+            lastBlockDepositEvents(each, (lastBlock) => {
+                getDepositEvents(each, lastBlock).then(results => {
+                    updateDepositEvents(each, results);
+                    isDepositInterval = false;
+                });
+            })
+            lastBlockWithdrawEvents(each, (lastBlock) => {
+                getWithdrawEvents(each, lastBlock).then(results => {
+                    updateWithdrawEvents(each, results);
+                    isWithdrawInterval = false;
+                });
+            })
         })
     }, interval);
 }
 
-const getGroupByBaseToken = (lockedTokens) => {
+const getGroupByBaseToken = (network, lockedTokens) => {
+    let _coin;
+    switch (network) {
+        case networks[0]:
+            _coin = weth;
+            break;
+        case networks[1]:
+            _coin = wbnb;
+            break;
+        default:
+            _coin = wavax;
+    }
     const groupByBaseToken = [];
     lockedTokens.map(each => {
         if (each.isLiquidity) {
             const index0 = groupByBaseToken.findIndex(group => group.token.address === each.token0.address);
             const index1 = groupByBaseToken.findIndex(group => group.token.address === each.token1.address);
-            if (each.token0.address !== wavax) {
+            if (each.token0.address !== _coin) {
                 if (index0 !== -1) groupByBaseToken[index0].data.push(each);
                 else groupByBaseToken.push({ token: each.token0, data: [each] });
             }
-            if (each.token1.address !== wavax) {
+            if (each.token1.address !== _coin) {
                 if (index1 !== -1) groupByBaseToken[index1].data.push(each);
                 else groupByBaseToken.push({ token: each.token1, data: [each] });
             }
@@ -258,15 +345,15 @@ const addEventToLockedTokens = (lockedTokens, depositEvents, withdrawEvents) => 
     })
 }
 
-const getWalletLockedTokens = (walletAddress, cb) => {
-    userLockedTokens(walletAddress, (data) => {
+const getWalletLockedTokens = (network, walletAddress, cb) => {
+    userLockedTokens(network, walletAddress, (data) => {
         const lockedTokens = data;
-        userDepositEvents(walletAddress, (data) => {
+        userDepositEvents(network, walletAddress, (data) => {
             const depositEvents = data;
-            userWithdrawEvents(walletAddress, (data) => {
+            userWithdrawEvents(network, walletAddress, (data) => {
                 const withdrawEvents = data;
                 const eventAddedLockedTokens = addEventToLockedTokens(lockedTokens, depositEvents, withdrawEvents);
-                const groupByBaseToken = getGroupByBaseToken(eventAddedLockedTokens);
+                const groupByBaseToken = getGroupByBaseToken(network, eventAddedLockedTokens);
                 cb(groupByBaseToken);
             })
         })

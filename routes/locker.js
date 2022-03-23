@@ -4,9 +4,10 @@ const router = express.Router();
 
 const { getWalletLockedTokens } = require('../src/locker');
 
-router.get('/lockedtokens/:wallet', (req, res) => {
+router.get('/lockedtokens/:network/:wallet', (req, res) => {
+    const network = req.params.network;
     const wallet = req.params.wallet;
-    getWalletLockedTokens(wallet, (data) => {
+    getWalletLockedTokens(network, wallet, (data) => {
         res.send(data);
     })
 })
