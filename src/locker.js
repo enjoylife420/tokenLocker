@@ -289,31 +289,31 @@ const getWithdrawEvents = async (network, lastBlock) => {
     }
 }
 
-let isLockedInterval = false, isDepositInterval = false, isWithdrawInterval = false;
+let isLockedInterval = [false, false, false, false], isDepositInterval = [false, false, false, false], isWithdrawInterval = [false, false, false, false];
 
 const startLocker = async (interval) => {
     setInterval(() => {
-        if (isLockedInterval || isDepositInterval || isWithdrawInterval) return;
-        isLockedInterval = true;
-        isDepositInterval = true;
-        isWithdrawInterval = true;
-        networks.map(each => {
+        networks.map((each, i) => {
+            if (isLockedInterval[i] || isDepositInterval[i] || isWithdrawInterval[i]) return;
+            isLockedInterval[i] = true;
+            isDepositInterval[i] = true;
+            isWithdrawInterval[i] = true;
             countLockedToken(each, (length) => {
                 getLockedData(each, length).then(results => {
                     updateLockedToken(each, results);
-                    isLockedInterval = false;
+                    isLockedInterval[i] = false;
                 });
             })
             lastBlockDepositEvents(each, (lastBlock) => {
                 getDepositEvents(each, lastBlock).then(results => {
                     updateDepositEvents(each, results);
-                    isDepositInterval = false;
+                    isDepositInterval[i] = false;
                 });
             })
             lastBlockWithdrawEvents(each, (lastBlock) => {
                 getWithdrawEvents(each, lastBlock).then(results => {
                     updateWithdrawEvents(each, results);
-                    isWithdrawInterval = false;
+                    isWithdrawInterval[i] = false;
                 });
             })
         })
