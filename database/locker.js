@@ -1,17 +1,17 @@
 const Datastore = require('nedb');
 
 const locker = new Datastore({ filename: './datastore/locker.db', autoload: true });
-const depositEvents = new Datastore({filename: './datastore/depositEvents.db', autoload: true});
-const withdrawEvents = new Datastore({filename: './datastore/withdrawEvents.db', autoload: true});
+const depositEvents = new Datastore({filename: './datastore/deposit_events.db', autoload: true});
+const withdrawEvents = new Datastore({filename: './datastore/withdraw_events.db', autoload: true});
 const locker_test = new Datastore({ filename: './datastore/locker_test.db', autoload: true });
-const depositEvents_test = new Datastore({filename: './datastore/depositEvents_test.db', autoload: true});
-const withdrawEvents_test = new Datastore({filename: './datastore/withdrawEvents_test.db', autoload: true});
+const depositEvents_test = new Datastore({filename: './datastore/deposit_events_test.db', autoload: true});
+const withdrawEvents_test = new Datastore({filename: './datastore/withdraw_events_test.db', autoload: true});
 const eth_locker = new Datastore({ filename: './datastore/eth_locker.db', autoload: true });
-const eth_depositEvents = new Datastore({filename: './datastore/eth_depositEvents.db', autoload: true});
-const eth_withdrawEvents = new Datastore({filename: './datastore/eth_withdrawEvents.db', autoload: true});
+const eth_depositEvents = new Datastore({filename: './datastore/eth_deposit_events.db', autoload: true});
+const eth_withdrawEvents = new Datastore({filename: './datastore/eth_withdraw_events.db', autoload: true});
 const bsc_locker = new Datastore({ filename: './datastore/bsc_locker.db', autoload: true });
-const bsc_depositEvents = new Datastore({filename: './datastore/bsc_depositEvents.db', autoload: true});
-const bsc_withdrawEvents = new Datastore({filename: './datastore/bsc_withdrawEvents.db', autoload: true});
+const bsc_depositEvents = new Datastore({filename: './datastore/bsc_deposit_events.db', autoload: true});
+const bsc_withdrawEvents = new Datastore({filename: './datastore/bsc_withdraw_events.db', autoload: true});
 
 // locker
 const userLockedTokens = (network, wallet, cb) => {
