@@ -128,6 +128,8 @@ const lastBlockDepositEvents = (network, cb) => {
 }
 
 const updateDepositEvents = (network, newDepositEvents) => {
+    console.log(network);
+    console.log(newDepositEvents);
     if (network === "Ethereum") {
         eth_depositEvents.insert(newDepositEvents.map(each => {
             return {
