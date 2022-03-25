@@ -27,10 +27,10 @@ const liquidityList = [
 ]
 
 const networks = [
-    'Ethereum',
-    'Binance Smart Chain',
+    // 'Ethereum',
+    // 'Binance Smart Chain',
     'Avalanche',
-    "Avalanche_testnet"
+    // "Avalanche_testnet"
 ]
 const wavax = '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7';
 const wavax_test = '0xd00ae08403B9bbb9124bB305C09058E32C39A48c';

@@ -278,6 +278,7 @@ const getWithdrawEvents = async (network, lastBlock) => {
             _multicall = multicall_avax;
     }
     let startBlock = lastBlock ? lastBlock + 1 : 0;
+    console.log(startBlock);
     let lockerContract = new _web3.eth.Contract(LogWithdrawal_abi, lockerAddress[network]);
     try {
         let events = await lockerContract.getPastEvents("LogWithdrawal", {
