@@ -360,6 +360,7 @@ const getGroupByBaseToken = (network, lockedTokens) => {
 
 const addEventToLockedTokens = (lockedTokens, depositEvents, withdrawEvents) => {
     return lockedTokens.map((each) => {
+        each.depositEvents = depositEvents;
         let depositIndex = depositEvents.findIndex(event => event.index === each.id);
         console.log(depositIndex);
         each.depositEvent = depositEvents[depositIndex];
