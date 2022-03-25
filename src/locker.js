@@ -294,22 +294,28 @@ let isLockedInterval = [false, false, false, false], isDepositInterval = [false,
 const startLocker = async (interval) => {
     setInterval(() => {
         networks.map((each, i) => {
-            if (isLockedInterval[i] || isDepositInterval[i] || isWithdrawInterval[i]) return;
+            if (isLockedInterval[i]) return;
             isLockedInterval[i] = true;
-            isDepositInterval[i] = true;
-            isWithdrawInterval[i] = true;
             countLockedToken(each, (length) => {
                 getLockedData(each, length).then(results => {
                     updateLockedToken(each, results);
                     isLockedInterval[i] = false;
                 });
             })
+        })
+        networks.map((each, i) => {
+            if (isDepositInterval[i]) return;
+            isDepositInterval[i] = true;
             lastBlockDepositEvents(each, (lastBlock) => {
                 getDepositEvents(each, lastBlock).then(results => {
                     updateDepositEvents(each, results);
                     isDepositInterval[i] = false;
                 });
             })
+        })
+        networks.map((each, i) => {
+            if (isWithdrawInterval[i]) return;
+            isWithdrawInterval[i] = true;
             lastBlockWithdrawEvents(each, (lastBlock) => {
                 getWithdrawEvents(each, lastBlock).then(results => {
                     updateWithdrawEvents(each, results);
