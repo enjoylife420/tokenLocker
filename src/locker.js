@@ -240,10 +240,12 @@ const getDepositEvents = async (network, lastBlock) => {
     }
     let startBlock = lastBlock ? lastBlock + 1 : 0;
     let lockerContract = new _web3.eth.Contract(LogLocking_abi, lockerAddress[network]);
+    console.log(lockerContract);
     try {
         let events = await lockerContract.getPastEvents("LogLocking", {
             fromBlock: startBlock
         })
+        console.log(events);
         for (let i = 0; i < events.length; i++) {
             const block = await _web3.eth.getBlock(events[i].blockNumber);
             events[i].timestamp = block.timestamp;
