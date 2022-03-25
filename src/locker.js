@@ -301,32 +301,38 @@ const startLocker = async (interval) => {
         networks.map((each, i) => {
             if (isLockedInterval[i]) return;
             isLockedInterval[i] = true;
-            countLockedToken(each, (length) => {
-                getLockedData(each, length).then(results => {
-                    updateLockedToken(each, results);
-                    isLockedInterval[i] = false;
-                });
-            })
+            setTimeout(() => {
+                countLockedToken(each, (length) => {
+                    getLockedData(each, length).then(results => {
+                        updateLockedToken(each, results);
+                        isLockedInterval[i] = false;
+                    });
+                })
+            }, i * 1000 / 3)
         })
         networks.map((each, i) => {
             if (isDepositInterval[i]) return;
             isDepositInterval[i] = true;
-            lastBlockDepositEvents(each, (lastBlock) => {
-                getDepositEvents(each, lastBlock).then(results => {
-                    updateDepositEvents(each, results);
-                    isDepositInterval[i] = false;
-                });
-            })
+            setTimeout(() => {
+                lastBlockDepositEvents(each, (lastBlock) => {
+                    getDepositEvents(each, lastBlock).then(results => {
+                        updateDepositEvents(each, results);
+                        isDepositInterval[i] = false;
+                    });
+                })
+            }, i * 1000 / 3 + 300)
         })
         networks.map((each, i) => {
             if (isWithdrawInterval[i]) return;
             isWithdrawInterval[i] = true;
-            lastBlockWithdrawEvents(each, (lastBlock) => {
-                getWithdrawEvents(each, lastBlock).then(results => {
-                    updateWithdrawEvents(each, results);
-                    isWithdrawInterval[i] = false;
-                });
-            })
+            setTimeout(() => {
+                lastBlockWithdrawEvents(each, (lastBlock) => {
+                    getWithdrawEvents(each, lastBlock).then(results => {
+                        updateWithdrawEvents(each, results);
+                        isWithdrawInterval[i] = false;
+                    });
+                })
+            }, i * 1000 / 3 + 600)
         })
     }, interval);
 }
