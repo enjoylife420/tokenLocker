@@ -298,24 +298,30 @@ const startLocker = async (interval) => {
             isLockedInterval[i] = true;
             isDepositInterval[i] = true;
             isWithdrawInterval[i] = true;
-            countLockedToken(each, (length) => {
-                getLockedData(each, length).then(results => {
-                    updateLockedToken(each, results);
-                    isLockedInterval[i] = false;
-                });
-            })
-            lastBlockDepositEvents(each, (lastBlock) => {
-                getDepositEvents(each, lastBlock).then(results => {
-                    updateDepositEvents(each, results);
-                    isDepositInterval[i] = false;
-                });
-            })
-            lastBlockWithdrawEvents(each, (lastBlock) => {
-                getWithdrawEvents(each, lastBlock).then(results => {
-                    updateWithdrawEvents(each, results);
-                    isWithdrawInterval[i] = false;
-                });
-            })
+            setTimeout(() => {
+                countLockedToken(each, (length) => {
+                    getLockedData(each, length).then(results => {
+                        updateLockedToken(each, results);
+                        isLockedInterval[i] = false;
+                    });
+                })
+            }, i * 1000 / 3)
+            setTimeout(() => {
+                lastBlockDepositEvents(each, (lastBlock) => {
+                    getDepositEvents(each, lastBlock).then(results => {
+                        updateDepositEvents(each, results);
+                        isDepositInterval[i] = false;
+                    });
+                })
+            }, i * 1000 / 3 + 300)
+            setTimeout(() => {
+                lastBlockWithdrawEvents(each, (lastBlock) => {
+                    getWithdrawEvents(each, lastBlock).then(results => {
+                        updateWithdrawEvents(each, results);
+                        isWithdrawInterval[i] = false;
+                    });
+                })
+            }, i * 1000 / 3 + 600)
         })
     }, interval);
 }
