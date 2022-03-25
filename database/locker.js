@@ -81,7 +81,7 @@ const updateLockedToken = (network, newLockedTokens) => {
 // depositEvents
 const userDepositEvents = (network, wallet, cb) => {
     if (network === "Ethereum") {
-        bsc_depositEvents.find({ SentToAddress: wallet.toLowerCase() }).sort({ index: 1 }).exec((err, data) => {
+        eth_depositEvents.find({ SentToAddress: wallet.toLowerCase() }).sort({ index: 1 }).exec((err, data) => {
             if (err) cb([]);
             else cb(data);
         })
@@ -128,6 +128,8 @@ const lastBlockDepositEvents = (network, cb) => {
 }
 
 const updateDepositEvents = (network, newDepositEvents) => {
+    console.log(network);
+    console.log(newDepositEvents);
     if (network === "Ethereum") {
         eth_depositEvents.insert(newDepositEvents.map(each => {
             return {

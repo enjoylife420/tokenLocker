@@ -240,16 +240,20 @@ const getDepositEvents = async (network, lastBlock) => {
     }
     let startBlock = lastBlock ? lastBlock + 1 : 0;
     let lockerContract = new _web3.eth.Contract(LogLocking_abi, lockerAddress[network]);
+    // console.log(lockerContract);
     try {
         let events = await lockerContract.getPastEvents("LogLocking", {
             fromBlock: startBlock
         })
+        console.log(startBlock);
+        console.log("event", events);
         for (let i = 0; i < events.length; i++) {
             const block = await _web3.eth.getBlock(events[i].blockNumber);
             events[i].timestamp = block.timestamp;
         }
         return events;
     } catch (e) {
+        console.log("error", e)
         return [];
     }
 }
@@ -294,34 +298,34 @@ let isLockedInterval = [false, false, false, false], isDepositInterval = [false,
 const startLocker = async (interval) => {
     setInterval(() => {
         networks.map((each, i) => {
-            if (isLockedInterval[i] || isDepositInterval[i] || isWithdrawInterval[i]) return;
+            if (isLockedInterval[i]) return;
             isLockedInterval[i] = true;
+            countLockedToken(each, (length) => {
+                getLockedData(each, length).then(results => {
+                    updateLockedToken(each, results);
+                    isLockedInterval[i] = false;
+                });
+            })
+        })
+        networks.map((each, i) => {
+            if (isDepositInterval[i]) return;
             isDepositInterval[i] = true;
+            lastBlockDepositEvents(each, (lastBlock) => {
+                getDepositEvents(each, lastBlock).then(results => {
+                    updateDepositEvents(each, results);
+                    isDepositInterval[i] = false;
+                });
+            })
+        })
+        networks.map((each, i) => {
+            if (isWithdrawInterval[i]) return;
             isWithdrawInterval[i] = true;
-            setTimeout(() => {
-                countLockedToken(each, (length) => {
-                    getLockedData(each, length).then(results => {
-                        updateLockedToken(each, results);
-                        isLockedInterval[i] = false;
-                    });
-                })
-            }, i * 1000 / 3)
-            setTimeout(() => {
-                lastBlockDepositEvents(each, (lastBlock) => {
-                    getDepositEvents(each, lastBlock).then(results => {
-                        updateDepositEvents(each, results);
-                        isDepositInterval[i] = false;
-                    });
-                })
-            }, i * 1000 / 3 + 300)
-            setTimeout(() => {
-                lastBlockWithdrawEvents(each, (lastBlock) => {
-                    getWithdrawEvents(each, lastBlock).then(results => {
-                        updateWithdrawEvents(each, results);
-                        isWithdrawInterval[i] = false;
-                    });
-                })
-            }, i * 1000 / 3 + 600)
+            lastBlockWithdrawEvents(each, (lastBlock) => {
+                getWithdrawEvents(each, lastBlock).then(results => {
+                    updateWithdrawEvents(each, results);
+                    isWithdrawInterval[i] = false;
+                });
+            })
         })
     }, interval);
 }
@@ -366,8 +370,11 @@ const getGroupByBaseToken = (network, lockedTokens) => {
 
 const addEventToLockedTokens = (lockedTokens, depositEvents, withdrawEvents) => {
     return lockedTokens.map((each) => {
+        each.depositEvents = depositEvents;
         let depositIndex = depositEvents.findIndex(event => event.index === each.id);
+        console.log(depositIndex);
         each.depositEvent = depositEvents[depositIndex];
+        each.depositIndex = depositIndex;
         if (each.isWithdrawn) {
             let withdrawIndex = withdrawEvents.findIndex(event => event.index === each.id);
             each.withdrawEvent = withdrawEvents[withdrawIndex];
@@ -381,6 +388,7 @@ const getWalletLockedTokens = (network, walletAddress, cb) => {
         const lockedTokens = data;
         userDepositEvents(network, walletAddress, (data) => {
             const depositEvents = data;
+            // cb([data]);
             userWithdrawEvents(network, walletAddress, (data) => {
                 const withdrawEvents = data;
                 const eventAddedLockedTokens = addEventToLockedTokens(lockedTokens, depositEvents, withdrawEvents);
