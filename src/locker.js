@@ -374,7 +374,6 @@ const addEventToLockedTokens = (lockedTokens, depositEvents, withdrawEvents) => 
 }
 
 const getWalletLockedTokens = (network, walletAddress, cb) => {
-    cb([{network:network, walletAddress:walletAddress}])
     userLockedTokens(network, walletAddress, (data) => {
         const lockedTokens = data;
         userDepositEvents(network, walletAddress, (data) => {
@@ -384,7 +383,7 @@ const getWalletLockedTokens = (network, walletAddress, cb) => {
                 const withdrawEvents = data;
                 const eventAddedLockedTokens = addEventToLockedTokens(lockedTokens, depositEvents, withdrawEvents);
                 const groupByBaseToken = getGroupByBaseToken(network, eventAddedLockedTokens);
-                // cb(groupByBaseToken);
+                cb(groupByBaseToken);
             })
         })
     })
