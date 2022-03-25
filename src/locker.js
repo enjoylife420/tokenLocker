@@ -361,7 +361,9 @@ const getGroupByBaseToken = (network, lockedTokens) => {
 const addEventToLockedTokens = (lockedTokens, depositEvents, withdrawEvents) => {
     return lockedTokens.map((each) => {
         let depositIndex = depositEvents.findIndex(event => event.index === each.id);
+        console.log(depositIndex);
         each.depositEvent = depositEvents[depositIndex];
+        each.depositIndex = depositIndex;
         if (each.isWithdrawn) {
             let withdrawIndex = withdrawEvents.findIndex(event => event.index === each.id);
             each.withdrawEvent = withdrawEvents[withdrawIndex];
