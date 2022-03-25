@@ -241,7 +241,7 @@ const getDepositEvents = async (network, lastBlock) => {
     let startBlock = lastBlock ? lastBlock + 1 : 0;
     let lockerContract = new _web3.eth.Contract(LogLocking_abi, lockerAddress[network]);
     // console.log(lockerContract);
-    // try {
+    try {
         let events = await lockerContract.getPastEvents("LogLocking", {
             fromBlock: startBlock
         })
@@ -252,9 +252,10 @@ const getDepositEvents = async (network, lastBlock) => {
             events[i].timestamp = block.timestamp;
         }
         return events;
-    // } catch (e) {
-    //     return [];
-    // }
+    } catch (e) {
+        console.log(e)
+        return [];
+    }
 }
 
 const getWithdrawEvents = async (network, lastBlock) => {
