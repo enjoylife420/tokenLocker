@@ -4,10 +4,9 @@ const router = express.Router();
 
 const { getLastDeployedContract, getClaimTokenList } = require('../src/vesting');
 
-router.get('/lastDeployed/:network/:wallet', (req, res) => {
+router.get('/lastDeployed/:wallet', (req, res) => {
     const wallet = req.params.wallet;
-    const network = req.params.network;
-    getLastDeployedContract(network, wallet, (data) => {
+    getLastDeployedContract(wallet, (data) => {
         res.send(data);
     })
 })

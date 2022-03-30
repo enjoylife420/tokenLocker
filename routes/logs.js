@@ -4,10 +4,9 @@ const router = express.Router();
 
 const { filterLogs } = require('../src/statistics');
 
-router.get('/:network/:wallet', (req, res) => {
+router.get('/:wallet', (req, res) => {
     const wallet = req.params.wallet;
-    const network = req.params.network;
-    filterLogs(network, wallet, (data) => {
+    filterLogs(wallet, (data) => {
         res.send(data);
     })
 })
