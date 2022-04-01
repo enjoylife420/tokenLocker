@@ -400,6 +400,7 @@ const getWalletLockedTokens = (network, walletAddress, cb) => {
                 const withdrawEvents = data;
                 const eventAddedLockedTokens = addEventToLockedTokens(lockedTokens, depositEvents, withdrawEvents);
                 const groupByBaseToken = getGroupByBaseToken(network, eventAddedLockedTokens);
+                console.log(groupByBaseToken);
                 cb(groupByBaseToken);
             })
         })
