@@ -2,7 +2,7 @@ const Web3 = require('web3');
 // const { Multicall } = require('ethereum-multicall');
 
 
-const { provider, swapTokenLockerFactory } = require('../public/constant');
+const { provider, swapTokenLockerFactory, networks } = require('../public/constant');
 
 const { getDeployed_abi } = require('../public/abi/swapTokenLockerFactory_abi');
 // const { getAllDepositIds_abi, lockedToken_abi, LogLocking_abi, LogWithdrawal_abi } = require('../public/abi/locker_abi');
@@ -11,11 +11,26 @@ const { getDeployed_abi } = require('../public/abi/swapTokenLockerFactory_abi');
 // const { lockerAddress, liquidityList, provider, wavax } = require('../public/constant');
 // const { countLockedToken, updateLockedToken, userLockedTokens, lastBlockDepositEvents, updateDepositEvents, userDepositEvents, lastBlockWithdrawEvents, updateWithdrawEvents, userWithdrawEvents } = require('../database/locker');
 
-const web3 = new Web3(provider);
-// const multicall = new Multicall({ web3Instance: web3, tryAggregate: true });
+const web3_eth = new Web3(provider[networks[0]]);
+const web3_bsc = new Web3(provider[networks[1]]);
+const web3_avax = new Web3(provider[networks[2]]);
+const web3_avax_test = new Web3(provider[networks[3]]);
 
-const getLastDeployedContract = async (wallet, cb) => {
-    const contract = new web3.eth.Contract(getDeployed_abi, swapTokenLockerFactory);
+const getLastDeployedContract = async (network, wallet, cb) => {
+    switch (network) {
+        case networks[0]:
+            _web3 = web3_eth;
+            break;
+        case networks[1]:
+            _web3 = web3_bsc;
+            break;
+        case networks[3]:
+            _web3 = web3_avax_test;
+            break;
+        default:
+            _web3 = web3_avax;
+    }
+    const contract = new _web3.eth.Contract(getDeployed_abi, swapTokenLockerFactory[network]);
     const deployed = await contract.methods.getDeployed(wallet).call();
     if (deployed.length) cb(deployed[deployed.length - 1]);
     else cb(undefined);
