@@ -1,7 +1,7 @@
 const axios = require('axios');
 const Web3 = require('web3');
 const { Multicall } = require('ethereum-multicall');
-const { tokenAddress, chain, tokenCreator, provider, networks } = require('../public/constant');
+const { tokenAddress, chain, tokenCreator, provider } = require('../public/constant');
 const { getLastLog, getLogsByFilter, addLogs, getAllLogs } = require('../database/statistics');
 const { balanceOfAbi } = require('../public/abi/erc20_abi');
 
@@ -61,8 +61,8 @@ const _fetchLogs = () => {
     })
 }
 
-function filterLogs (network, _walletAddress, cb) {
-    getLogsByFilter(network, _walletAddress, (logs) => {
+function filterLogs (_walletAddress, cb) {
+    getLogsByFilter(_walletAddress, (logs) => {
         cb(logs);
     })
     // return logs.filter(each => getAddress(each.topic1) === _walletAddress.toLowerCase() || getAddress(each.topic2) === _walletAddress.toLowerCase());
